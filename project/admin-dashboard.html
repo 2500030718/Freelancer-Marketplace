@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Dashboard - SkillBridge</title>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    .page-container { max-width: 1200px; margin: 0 auto; padding: 2.5rem 1.5rem 4rem; }
+    .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 1rem; margin: 1.5rem 0 2.5rem; }
+    .stat-card { padding: 1.25rem; }
+    .stat-label { color: var(--color-text-muted); font-size: .875rem; margin-bottom: .5rem; }
+    .stat-value { font-size: 2rem; font-weight: 800; }
+    .table-wrap { overflow-x: auto; margin-bottom: 2.5rem; }
+    table { width: 100%; border-collapse: collapse; min-width: 650px; }
+    th, td { padding: .85rem; text-align: left; border-bottom: 1px solid var(--color-border); }
+    th { color: var(--color-text-muted); font-size: .875rem; }
+    td .btn { padding: .4rem .7rem; }
+  </style>
+  <script src="js/storage.js"></script>
+  <script src="js/utils.js"></script>
+  <script src="js/auth.js"></script>
+  <script>
+    // Guard access before loading or rendering admin data.
+    const currentUser = requireRole('admin');
+  </script>
+  <script src="js/projects.js"></script>
+  <script src="js/users.js"></script>
+  <script src="js/admin.js"></script>
+</head>
+<body>
+  <header>
+    <nav class="navbar" id="top-navbar">
+      <a href="index.html" class="nav-brand">Skill<span>Bridge</span></a>
+      <div class="nav-actions"><button class="btn btn-outline" onclick="logout()">Logout</button></div>
+    </nav>
+  </header>
+  <main class="page-container">
+    <span class="badge badge-open">Administrator Area</span>
+    <h1 style="margin-top: .75rem;">Admin Dashboard</h1>
+    <p id="user-info" style="color: var(--color-text-muted);">Logged in as: <span id="user-display"></span></p>
+
+    <section id="admin-stats" class="stats-grid" aria-label="Marketplace statistics"></section>
+
+    <section>
+      <h2>Users</h2>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Name</th><th>Email</th><th>Role</th><th>Created</th><th>Action</th></tr></thead>
+        <tbody id="users-table-body"></tbody>
+      </table></div>
+    </section>
+    <section>
+      <h2>Projects</h2>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Title</th><th>Client</th><th>Status</th><th>Budget</th><th>Action</th></tr></thead>
+        <tbody id="projects-table-body"></tbody>
+      </table></div>
+    </section>
+    <section>
+      <h2>Proposals</h2>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Project</th><th>Freelancer</th><th>Bid Amount</th><th>Status</th></tr></thead>
+        <tbody id="proposals-table-body"></tbody>
+      </table></div>
+    </section>
+  </main>
+  <script>
+    if (currentUser) {
+      document.getElementById('user-display').textContent = `${currentUser.name} (${currentUser.role})`;
+      renderAdminDashboard();
+    }
+  </script>
+</body>
+</html>

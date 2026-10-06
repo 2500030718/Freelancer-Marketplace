@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Project Details - SkillBridge</title>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    .page-container {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 2.5rem 1.5rem 4rem;
+    }
+    .detail-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1.25rem;
+      padding: 1.25rem 0;
+      border-top: 1px solid var(--color-border);
+      border-bottom: 1px solid var(--color-border);
+      margin: 1.5rem 0;
+    }
+    .detail-item-label {
+      font-size: 0.8125rem;
+      color: var(--color-text-muted);
+      margin-bottom: 0.25rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .detail-item-value {
+      font-size: 1.125rem;
+      font-weight: 700;
+      color: var(--color-text);
+    }
+    .form-group {
+      margin-bottom: 1.25rem;
+    }
+    .form-label {
+      display: block;
+      font-size: 0.875rem;
+      font-weight: 600;
+      margin-bottom: 0.375rem;
+      color: var(--color-text);
+    }
+  </style>
+  <script src="js/storage.js"></script>
+  <script src="js/utils.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/projects.js"></script>
+  <script src="js/proposals.js"></script>
+  <script>
+    // Route guard: only freelancers can view the freelancer project perspective
+    const currentUser = requireRole('freelancer');
+  </script>
+</head>
+<body>
+  <!-- Navigation Bar -->
+  <header>
+    <nav class="navbar" id="top-navbar">
+      <a href="index.html" class="nav-brand" id="brand-logo">
+        Skill<span>Bridge</span>
+      </a>
+      <ul class="nav-links">
+        <li><a href="freelancer-dashboard.html" class="nav-link">Dashboard</a></li>
+        <li><a href="browse-projects.html" class="nav-link active">Browse Projects</a></li>
+        <li><a href="my-proposals.html" class="nav-link">My Proposals</a></li>
+        <li><a href="my-profile.html" class="nav-link">My Profile</a></li>
+      </ul>
+      <div class="nav-actions">
+        <button id="logout-btn" class="btn btn-outline" onclick="logout()">Logout</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="page-container" id="main-content">
+    <div style="margin-bottom: 1.5rem;">
+      <a href="browse-projects.html" style="font-size: 0.875rem; color: var(--color-text-muted); display: inline-flex; align-items: center; gap: 0.25rem;">
+        &larr; Back to Browse Projects
+      </a>
+    </div>
+
+    <div id="project-container">
+      <div class="card" style="padding: 2.5rem; text-align: center;">
+        <p style="color: var(--color-text-muted);">Loading project information...</p>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    if (currentUser) {
+      const urlParams = new URLSearchParams(window.location.search);
+      const projectId = urlParams.get('id');
+      const container = document.getElementById('project-container');
+
+      const project = getProjectById(projectId);
+
+      if (!project) {
+        container.innerHTML = `
+          <div class="card" style="text-align: center; padding: 3rem 1.5rem;">
+            <div style="margin-bottom: 1rem;">
+              <span class="badge badge-rejected">Not Found</span>
+            </div>
+            <h2 style="font-size: 1.5rem; font-weight: 700; color: var(--color-text); margin-bottom: 0.5rem;">
+              Project Not Found
+            </h2>
+            <p style="color: var(--color-text-muted); margin-bottom: 1.5rem; font-size: 0.95rem;">
+              The project you requested does not exist or may have been closed by the client.
+            </p>
+            <a href="browse-projects.html" class="btn btn-primary">&larr; Return to Browse Projects</a>
+          </div>
+        `;
+      } else {
+        const badgeClass = getStatusBadgeClass(project.status);
+        const formattedBudget = formatCurrency(project.budget);
+        const deadlineFormatted = project.deadline ? new Date(project.deadline).toLocaleDateString() : 'Not specified';
+        const createdFormatted = project.createdAt ? new Date(project.createdAt).toLocaleDateString() : 'N/A';
+
+        const skillsHtml = Array.isArray(project.skillsNeeded) && project.skillsNeeded.length > 0
+          ? project.skillsNeeded
+              .map(s => `<span class="badge" style="background-color: rgba(37,99,235,0.08); color: var(--color-primary);">${escapeHtml(s)}</span>`)
+              .join(' ')
+          : '<span style="color: var(--color-text-muted); font-size: 0.875rem;">None specified</span>';
+
+        container.innerHTML = `
+          <!-- Project Info Card -->
+          <article class="card" style="padding: 2.25rem 2rem; margin-bottom: 2rem;">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem; margin-bottom: 1rem; flex-wrap: wrap;">
+              <h1 style="font-size: 1.875rem; font-weight: 800; color: var(--color-text); margin: 0; line-height: 1.25; flex: 1;">
+                ${escapeHtml(project.title)}
+              </h1>
+              <span class="badge ${badgeClass}" style="font-size: 0.875rem; padding: 0.375rem 0.75rem;">
+                ${escapeHtml(project.status)}
+              </span>
+            </div>
+
+            <div class="detail-grid">
+              <div>
+                <div class="detail-item-label">Client Budget</div>
+                <div class="detail-item-value" style="color: var(--color-primary);">${formattedBudget}</div>
+              </div>
+              <div>
+                <div class="detail-item-label">Target Deadline</div>
+                <div class="detail-item-value">${escapeHtml(deadlineFormatted)}</div>
+              </div>
+              <div>
+                <div class="detail-item-label">Date Posted</div>
+                <div class="detail-item-value" style="font-size: 1rem; font-weight: 600;">${escapeHtml(createdFormatted)}</div>
+              </div>
+            </div>
+
+            <div style="margin-bottom: 1.75rem;">
+              <h3 style="font-size: 1rem; font-weight: 700; color: var(--color-text); margin-bottom: 0.5rem;">
+                Project Description
+              </h3>
+              <p style="color: var(--color-text); font-size: 0.95rem; line-height: 1.7; white-space: pre-line;">
+                ${escapeHtml(project.description)}
+              </p>
+            </div>
+
+            <div>
+              <h3 style="font-size: 1rem; font-weight: 700; color: var(--color-text); margin-bottom: 0.5rem;">
+                Required Skills
+              </h3>
+              <div style="display: flex; flex-wrap: wrap; gap: 0.5rem;">
+                ${skillsHtml}
+              </div>
+            </div>
+          </article>
+
+          <!-- Submit Proposal Form Card -->
+          <article class="card" style="padding: 2.25rem 2rem;">
+            <div style="margin-bottom: 1.25rem;">
+              <h2 style="font-size: 1.375rem; font-weight: 700; color: var(--color-text); margin: 0 0 0.25rem;">
+                Submit a Proposal
+              </h2>
+              <p style="color: var(--color-text-muted); font-size: 0.9375rem; margin: 0;">
+                Pitch your services, describe your technical approach, and set your bid amount.
+              </p>
+            </div>
+
+            <div id="proposal-error-alert" class="input-error-message" style="display: none; padding: 0.875rem 1.25rem; font-size: 0.9375rem; margin-bottom: 1.25rem; width: 100%; border-radius: var(--radius); text-align: left; background-color: rgba(220, 38, 38, 0.08); border: 1px solid rgba(220, 38, 38, 0.25);"></div>
+
+            <form id="submit-proposal-form" novalidate>
+              <div class="form-group">
+                <label for="proposal-message" class="form-label">Cover Letter / Proposal Message *</label>
+                <textarea
+                  id="proposal-message"
+                  name="message"
+                  class="input"
+                  rows="5"
+                  placeholder="Introduce yourself, describe relevant projects from your portfolio, and outline how you will achieve the client's goals..."
+                  required
+                ></textarea>
+                <span id="proposal-message-error" class="input-error-message" style="display: none;"></span>
+              </div>
+
+              <div class="form-group">
+                <label for="proposal-bid" class="form-label">Your Bid Amount ($ USD) *</label>
+                <input
+                  type="number"
+                  id="proposal-bid"
+                  name="bidAmount"
+                  class="input"
+                  placeholder="e.g. 1200"
+                  min="1"
+                  step="any"
+                  required
+                >
+                <span id="proposal-bid-error" class="input-error-message" style="display: none;"></span>
+              </div>
+
+              <div style="display: flex; justify-content: flex-end; gap: 1rem; margin-top: 1.5rem;">
+                <a href="browse-projects.html" class="btn btn-outline">Cancel</a>
+                <button type="submit" id="btn-submit-proposal" class="btn btn-primary">
+                  Submit Proposal &rarr;
+                </button>
+              </div>
+            </form>
+          </article>
+        `;
+
+        // Wire real proposal submission
+        const proposalForm = document.getElementById('submit-proposal-form');
+        const messageInput = document.getElementById('proposal-message');
+        const bidInput = document.getElementById('proposal-bid');
+        const errorAlert = document.getElementById('proposal-error-alert');
+
+        // Check if freelancer already proposed on this project
+        const alreadyProposed = getAll('proposals').some(
+          p => String(p.projectId) === String(project.id) && String(p.freelancerId) === String(currentUser.id)
+        );
+        if (alreadyProposed && errorAlert) {
+          errorAlert.textContent = 'You have already submitted a proposal for this project.';
+          errorAlert.style.display = 'block';
+        }
+
+        [messageInput, bidInput].forEach(inp => {
+          inp.addEventListener('input', () => {
+            inp.classList.remove('input-error');
+            const errEl = document.getElementById(`${inp.id}-error`);
+            if (errEl) {
+              errEl.textContent = '';
+              errEl.style.display = 'none';
+            }
+            if (errorAlert && !alreadyProposed) {
+              errorAlert.textContent = '';
+              errorAlert.style.display = 'none';
+            }
+          });
+        });
+
+        proposalForm.addEventListener('submit', (e) => {
+          e.preventDefault();
+
+          let hasErrors = false;
+          const message = messageInput.value.trim();
+          const bidVal = bidInput.value.trim();
+          const bidNumber = Number(bidVal);
+
+          if (!message) {
+            messageInput.classList.add('input-error');
+            const err = document.getElementById('proposal-message-error');
+            err.textContent = 'Please enter your proposal cover letter.';
+            err.style.display = 'block';
+            hasErrors = true;
+          }
+
+          if (!bidVal || isNaN(bidNumber) || bidNumber <= 0) {
+            bidInput.classList.add('input-error');
+            const err = document.getElementById('proposal-bid-error');
+            err.textContent = 'Please enter a valid bid amount.';
+            err.style.display = 'block';
+            hasErrors = true;
+          }
+
+          if (hasErrors) return;
+
+          // Call submitProposal from js/proposals.js
+          const result = submitProposal(project.id, currentUser.id, message, bidNumber);
+
+          if (!result.success) {
+            if (errorAlert) {
+              errorAlert.textContent = result.error || 'You have already submitted a proposal for this project.';
+              errorAlert.style.display = 'block';
+            }
+            return;
+          }
+
+          // On success, redirect to my-proposals.html
+          window.location.href = 'my-proposals.html';
+        });
+      }
+    }
+  </script>
+</body>
+</html>

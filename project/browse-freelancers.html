@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Browse Freelancers - SkillBridge</title>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    .page-container {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 2.5rem 1.5rem 4rem;
+    }
+    .freelancers-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 1.5rem;
+    }
+    .filter-controls { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1rem; margin: 1.5rem 0; }
+    .filter-controls label { display: block; font-weight: 600; margin-bottom: .4rem; }
+  </style>
+  <script src="js/storage.js"></script>
+  <script src="js/utils.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/users.js"></script>
+  <script src="js/ui.js"></script>
+  <script>
+    // Route guard: clients can browse freelancers
+    const currentUser = requireRole('client');
+  </script>
+</head>
+<body>
+  <!-- Navigation Bar -->
+  <header>
+    <nav class="navbar" id="top-navbar">
+      <a href="index.html" class="nav-brand" id="brand-logo">
+        Skill<span>Bridge</span>
+      </a>
+      <ul class="nav-links">
+        <li><a href="client-dashboard.html" class="nav-link">Dashboard</a></li>
+        <li><a href="my-projects.html" class="nav-link">My Projects</a></li>
+        <li><a href="post-project.html" class="nav-link">Post a Project</a></li>
+        <li><a href="browse-freelancers.html" class="nav-link active">Browse Freelancers</a></li>
+      </ul>
+      <div class="nav-actions">
+        <button id="logout-btn" class="btn btn-outline" onclick="logout()">Logout</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="page-container">
+    <div style="margin-bottom: 2rem;">
+      <div style="margin-bottom: 0.5rem;">
+        <span class="badge badge-accepted">Talent Directory</span>
+      </div>
+      <h1 style="font-size: 2rem; font-weight: 800; color: var(--color-text); margin-bottom: 0.25rem;">
+        Browse Freelancers
+      </h1>
+      <p style="color: var(--color-text-muted); font-size: 0.9375rem;">
+        Discover independent professionals with expertise across development, design, content, and more.
+      </p>
+    </div>
+
+    <div class="filter-controls" role="search" aria-label="Filter freelancers">
+      <div><label for="freelancer-keyword">Keyword</label><input class="input" id="freelancer-keyword" type="search" placeholder="Search names or bios"></div>
+      <div><label for="freelancer-skill">Skill</label><input class="input" id="freelancer-skill" type="search" placeholder="Filter by skill"></div>
+    </div>
+
+    <!-- Freelancers Grid Container -->
+    <div id="freelancers-container" class="freelancers-grid">
+      <!-- Populated via js/users.js renderFreelancerList -->
+    </div>
+  </main>
+
+  <script>
+    if (currentUser) {
+      const container = document.getElementById('freelancers-container');
+      const keywordInput = document.getElementById('freelancer-keyword');
+      const skillInput = document.getElementById('freelancer-skill');
+      const renderFreelancers = () => {
+        const filtered = filterFreelancers(getFreelancers(), {
+          keyword: keywordInput.value,
+          skill: skillInput.value
+        });
+        if (filtered.length === 0 && (keywordInput.value.trim() || skillInput.value.trim())) {
+          renderEmptyState(container, { title: 'No matching freelancers', message: 'Try changing or clearing your filters.' });
+          return;
+        }
+        renderFreelancerList(container, filtered);
+      };
+      keywordInput.addEventListener('input', renderFreelancers);
+      skillInput.addEventListener('input', renderFreelancers);
+      renderFreelancers();
+    }
+  </script>
+</body>
+</html>

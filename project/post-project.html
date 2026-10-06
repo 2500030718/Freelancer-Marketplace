@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Post a Project - SkillBridge</title>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    .page-container {
+      max-width: 760px;
+      margin: 0 auto;
+      padding: 2.5rem 1.5rem 4rem;
+    }
+    .form-group {
+      margin-bottom: 1.5rem;
+    }
+    .form-label {
+      display: block;
+      font-size: 0.875rem;
+      font-weight: 600;
+      margin-bottom: 0.375rem;
+      color: var(--color-text);
+    }
+    .form-hint {
+      font-size: 0.8125rem;
+      color: var(--color-text-muted);
+      margin-top: 0.25rem;
+    }
+    textarea.input {
+      resize: vertical;
+      min-height: 120px;
+    }
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.25rem;
+    }
+    @media (max-width: 600px) {
+      .form-row {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+  <script src="js/storage.js"></script>
+  <script src="js/utils.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/projects.js"></script>
+  <script>
+    // Route guard: only clients can post projects
+    const currentUser = requireRole('client');
+  </script>
+</head>
+<body>
+  <!-- Navigation Bar -->
+  <header>
+    <nav class="navbar" id="top-navbar">
+      <a href="index.html" class="nav-brand" id="brand-logo">
+        Skill<span>Bridge</span>
+      </a>
+      <ul class="nav-links">
+        <li><a href="client-dashboard.html" class="nav-link">Dashboard</a></li>
+        <li><a href="my-projects.html" class="nav-link">My Projects</a></li>
+        <li><a href="post-project.html" class="nav-link active">Post a Project</a></li>
+        <li><a href="browse-freelancers.html" class="nav-link">Browse Freelancers</a></li>
+      </ul>
+      <div class="nav-actions">
+        <button id="logout-btn" class="btn btn-outline" onclick="logout()">Logout</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="page-container">
+    <div style="margin-bottom: 1.75rem;">
+      <a href="my-projects.html" style="font-size: 0.875rem; color: var(--color-text-muted); display: inline-flex; align-items: center; gap: 0.25rem; margin-bottom: 0.75rem;">
+        &larr; Back to My Projects
+      </a>
+      <h1 style="font-size: 2rem; font-weight: 800; color: var(--color-text); margin-bottom: 0.375rem;">
+        Post a New Project
+      </h1>
+      <p style="color: var(--color-text-muted); font-size: 0.9375rem;">
+        Provide details about your project to receive tailored proposals from expert freelancers.
+      </p>
+    </div>
+
+    <div class="card" style="padding: 2rem;">
+      <form id="post-project-form" novalidate>
+        <div class="form-group">
+          <label for="project-title" class="form-label">Project Title *</label>
+          <input
+            type="text"
+            id="project-title"
+            name="title"
+            class="input"
+            placeholder="e.g. Modern Landing Page Redesign in Next.js"
+            required
+          >
+          <span id="project-title-error" class="input-error-message" style="display: none;"></span>
+        </div>
+
+        <div class="form-group">
+          <label for="project-desc" class="form-label">Project Description *</label>
+          <textarea
+            id="project-desc"
+            name="description"
+            class="input"
+            placeholder="Explain the scope of work, key deliverables, expectations, and any technical constraints..."
+            required
+          ></textarea>
+          <span id="project-desc-error" class="input-error-message" style="display: none;"></span>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="project-budget" class="form-label">Budget ($ USD) *</label>
+            <input
+              type="number"
+              id="project-budget"
+              name="budget"
+              class="input"
+              placeholder="e.g. 1500"
+              min="1"
+              step="any"
+              required
+            >
+            <span id="project-budget-error" class="input-error-message" style="display: none;"></span>
+          </div>
+
+          <div class="form-group">
+            <label for="project-deadline" class="form-label">Target Deadline *</label>
+            <input
+              type="date"
+              id="project-deadline"
+              name="deadline"
+              class="input"
+              required
+            >
+            <span id="project-deadline-error" class="input-error-message" style="display: none;"></span>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="project-skills" class="form-label">Skills Needed (Comma-Separated)</label>
+          <input
+            type="text"
+            id="project-skills"
+            name="skillsNeeded"
+            class="input"
+            placeholder="e.g. React, TypeScript, CSS Grid, Figma"
+          >
+          <p class="form-hint">Separate multiple skills with commas.</p>
+          <span id="project-skills-error" class="input-error-message" style="display: none;"></span>
+        </div>
+
+        <div style="display: flex; gap: 1rem; justify-content: flex-end; margin-top: 2rem;">
+          <a href="client-dashboard.html" class="btn btn-outline">Cancel</a>
+          <button type="submit" id="submit-project-btn" class="btn btn-primary">
+            Publish Project &rarr;
+          </button>
+        </div>
+      </form>
+    </div>
+  </main>
+
+  <script>
+    const form = document.getElementById('post-project-form');
+    const titleInput = document.getElementById('project-title');
+    const descInput = document.getElementById('project-desc');
+    const budgetInput = document.getElementById('project-budget');
+    const deadlineInput = document.getElementById('project-deadline');
+    const skillsInput = document.getElementById('project-skills');
+
+    // Clear error states on input
+    [titleInput, descInput, budgetInput, deadlineInput, skillsInput].forEach(input => {
+      input.addEventListener('input', () => {
+        input.classList.remove('input-error');
+        const err = document.getElementById(`${input.id}-error`);
+        if (err) {
+          err.textContent = '';
+          err.style.display = 'none';
+        }
+      });
+    });
+
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+
+      let hasErrors = false;
+
+      const title = titleInput.value.trim();
+      const description = descInput.value.trim();
+      const budgetVal = budgetInput.value.trim();
+      const deadline = deadlineInput.value;
+      const skillsRaw = skillsInput.value.trim();
+
+      if (!title) {
+        showError(titleInput, 'project-title-error', 'Please provide a project title.');
+        hasErrors = true;
+      }
+
+      if (!description) {
+        showError(descInput, 'project-desc-error', 'Please provide a detailed project description.');
+        hasErrors = true;
+      }
+
+      const budgetNumber = Number(budgetVal);
+      if (!budgetVal || isNaN(budgetNumber) || budgetNumber <= 0) {
+        showError(budgetInput, 'project-budget-error', 'Please enter a valid positive budget amount.');
+        hasErrors = true;
+      }
+
+      if (!deadline) {
+        showError(deadlineInput, 'project-deadline-error', 'Please choose a target deadline date.');
+        hasErrors = true;
+      }
+
+      if (hasErrors) return;
+
+      // Parse comma-separated skills
+      const skillsNeeded = skillsRaw
+        ? skillsRaw.split(',').map(s => s.trim()).filter(Boolean)
+        : [];
+
+      createProject({
+        clientId: currentUser.id,
+        title,
+        description,
+        skillsNeeded,
+        budget: budgetNumber,
+        deadline
+      });
+
+      // Redirect to my-projects.html
+      window.location.href = 'my-projects.html';
+    });
+
+    function showError(inputEl, errorId, message) {
+      inputEl.classList.add('input-error');
+      const errEl = document.getElementById(errorId);
+      if (errEl) {
+        errEl.textContent = message;
+        errEl.style.display = 'block';
+      }
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Proposals - SkillBridge</title>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    .page-container {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 2.5rem 1.5rem 4rem;
+    }
+    .proposals-list {
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+    .proposal-card {
+      padding: 1.75rem 2rem;
+    }
+  </style>
+  <script src="js/storage.js"></script>
+  <script src="js/utils.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/projects.js"></script>
+  <script src="js/proposals.js"></script>
+  <script>
+    // Route guard: only freelancers can view their proposals
+    const currentUser = requireRole('freelancer');
+  </script>
+</head>
+<body>
+  <!-- Navigation Bar -->
+  <header>
+    <nav class="navbar" id="top-navbar">
+      <a href="index.html" class="nav-brand" id="brand-logo">
+        Skill<span>Bridge</span>
+      </a>
+      <ul class="nav-links">
+        <li><a href="freelancer-dashboard.html" class="nav-link">Dashboard</a></li>
+        <li><a href="browse-projects.html" class="nav-link">Browse Projects</a></li>
+        <li><a href="my-proposals.html" class="nav-link active">My Proposals</a></li>
+        <li><a href="my-profile.html" class="nav-link">My Profile</a></li>
+      </ul>
+      <div class="nav-actions">
+        <button id="logout-btn" class="btn btn-outline" onclick="logout()">Logout</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="page-container">
+    <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem;">
+      <div>
+        <div style="margin-bottom: 0.5rem;">
+          <span class="badge badge-accepted">Proposal Tracking</span>
+        </div>
+        <h1 style="font-size: 2rem; font-weight: 800; color: var(--color-text); margin-bottom: 0.25rem;">
+          My Proposals
+        </h1>
+        <p style="color: var(--color-text-muted); font-size: 0.9375rem;">
+          Review the status of your submitted bids and manage deliverables for accepted client projects.
+        </p>
+      </div>
+      <div>
+        <a href="browse-projects.html" class="btn btn-outline">
+          Browse More Projects &rarr;
+        </a>
+      </div>
+    </div>
+
+    <!-- Proposals List Container -->
+    <div id="proposals-container">
+      <div class="card" style="padding: 2.5rem; text-align: center;">
+        <p style="color: var(--color-text-muted);">Loading your proposals...</p>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    if (currentUser) {
+      function renderProposals() {
+        const container = document.getElementById('proposals-container');
+        const proposals = getProposalsForFreelancer(currentUser.id);
+        const allProjects = getAll('projects');
+
+        if (!proposals || proposals.length === 0) {
+          container.innerHTML = `
+            <div class="card" style="text-align: center; padding: 3.5rem 2rem;">
+              <div style="margin-bottom: 1rem;">
+                <span class="badge badge-open">No Proposals</span>
+              </div>
+              <h2 style="font-size: 1.375rem; font-weight: 700; color: var(--color-text); margin-bottom: 0.5rem;">
+                No proposals yet
+              </h2>
+              <p style="color: var(--color-text-muted); max-width: 480px; margin: 0 auto 1.75rem; font-size: 0.95rem; line-height: 1.6;">
+                You haven't submitted any project proposals yet. Browse active open projects on SkillBridge to find opportunities matching your skill set and submit your bids.
+              </p>
+              <a href="browse-projects.html" class="btn btn-primary" id="btn-browse-empty-cta">
+                Browse Open Projects &rarr;
+              </a>
+            </div>
+          `;
+          return;
+        }
+
+        container.innerHTML = `
+          <div class="proposals-list">
+            ${proposals.map(prop => {
+              const project = allProjects.find(pr => String(pr.id) === String(prop.projectId));
+              const projectTitle = project ? project.title : `Project #${prop.projectId}`;
+              const propBadgeClass = getStatusBadgeClass(prop.status);
+              const formattedBid = formatCurrency(prop.bidAmount);
+              const submittedDate = prop.createdAt ? new Date(prop.createdAt).toLocaleDateString() : 'Recent';
+
+              const isAccepted = String(prop.status).toUpperCase() === 'ACCEPTED';
+              const isProjectCompleted = project && String(project.status).toUpperCase() === 'COMPLETED';
+
+              let actionHtml = '';
+              if (isAccepted) {
+                if (isProjectCompleted) {
+                  actionHtml = `
+                    <div style="display: flex; align-items: center; gap: 0.5rem;">
+                      <span class="badge badge-completed" style="padding: 0.4rem 0.75rem; font-size: 0.8125rem;">
+                        &#10003; Project Completed
+                      </span>
+                    </div>
+                  `;
+                } else {
+                  actionHtml = `
+                    <button
+                      class="btn btn-primary"
+                      id="btn-complete-${escapeHtml(prop.id)}"
+                      style="padding: 0.45rem 1rem; font-size: 0.875rem;"
+                      onclick="handleMarkCompleted('${escapeHtml(prop.projectId)}')"
+                    >
+                      &#10003; Mark as Completed
+                    </button>
+                  `;
+                }
+              }
+
+              return `
+                <article class="card proposal-card" id="proposal-${escapeHtml(prop.id)}">
+                  <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem; margin-bottom: 0.875rem; flex-wrap: wrap;">
+                    <div>
+                      <h3 style="font-size: 1.25rem; font-weight: 700; color: var(--color-text); margin: 0 0 0.35rem; line-height: 1.3;">
+                        <a href="project-view.html?id=${encodeURIComponent(prop.projectId)}" style="color: inherit; text-decoration: none;">
+                          ${escapeHtml(projectTitle)}
+                        </a>
+                      </h3>
+                      <div style="font-size: 0.8125rem; color: var(--color-text-muted);">
+                        Submitted on ${escapeHtml(submittedDate)} &bull; Project Status: <strong style="color: var(--color-text);">${escapeHtml(project ? project.status : 'UNKNOWN')}</strong>
+                      </div>
+                    </div>
+                    <span class="badge ${propBadgeClass}" style="font-size: 0.8125rem; padding: 0.3rem 0.65rem;">
+                      ${escapeHtml(prop.status)}
+                    </span>
+                  </div>
+
+                  <div style="margin-bottom: 1rem; font-size: 0.9375rem;">
+                    <span style="color: var(--color-text-muted);">Your Bid:</span>
+                    <strong style="color: var(--color-text); font-size: 1.05rem; margin-left: 0.25rem;">${formattedBid}</strong>
+                  </div>
+
+                  <p style="color: var(--color-text); font-size: 0.9375rem; line-height: 1.6; margin-bottom: 1.25rem; background-color: var(--color-bg); padding: 1rem; border-radius: var(--radius); white-space: pre-line;">
+                    ${escapeHtml(prop.message || '')}
+                  </p>
+
+                  <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.75rem; border-top: 1px solid var(--color-border); padding-top: 1rem;">
+                    <a href="project-view.html?id=${encodeURIComponent(prop.projectId)}" class="btn btn-outline" style="font-size: 0.8125rem; padding: 0.4rem 0.85rem;">
+                      View Project Listing &rarr;
+                    </a>
+                    ${actionHtml}
+                  </div>
+                </article>
+              `;
+            }).join('')}
+          </div>
+        `;
+      }
+
+      window.handleMarkCompleted = function(projectId) {
+        const success = markProjectCompleted(projectId, currentUser.id);
+        if (success) {
+          renderProposals();
+        }
+      };
+
+      renderProposals();
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Projects - SkillBridge</title>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    .page-container {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 2.5rem 1.5rem 4rem;
+    }
+    .projects-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 1.5rem;
+    }
+  </style>
+  <script src="js/storage.js"></script>
+  <script src="js/utils.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/projects.js"></script>
+  <script>
+    // Route guard: only clients can view their projects dashboard
+    const currentUser = requireRole('client');
+  </script>
+</head>
+<body>
+  <!-- Navigation Bar -->
+  <header>
+    <nav class="navbar" id="top-navbar">
+      <a href="index.html" class="nav-brand" id="brand-logo">
+        Skill<span>Bridge</span>
+      </a>
+      <ul class="nav-links">
+        <li><a href="client-dashboard.html" class="nav-link">Dashboard</a></li>
+        <li><a href="my-projects.html" class="nav-link active">My Projects</a></li>
+        <li><a href="post-project.html" class="nav-link">Post a Project</a></li>
+        <li><a href="browse-freelancers.html" class="nav-link">Browse Freelancers</a></li>
+      </ul>
+      <div class="nav-actions">
+        <button id="logout-btn" class="btn btn-outline" onclick="logout()">Logout</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="page-container">
+    <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem;">
+      <div>
+        <div style="margin-bottom: 0.5rem;">
+          <span class="badge badge-open">Client Project Management</span>
+        </div>
+        <h1 style="font-size: 2rem; font-weight: 800; color: var(--color-text); margin-bottom: 0.25rem;">
+          My Projects
+        </h1>
+        <p style="color: var(--color-text-muted); font-size: 0.9375rem;">
+          Manage your posted projects, track timelines, and review incoming freelancer proposals.
+        </p>
+      </div>
+      <div>
+        <a href="post-project.html" class="btn btn-primary" id="btn-post-new-project">
+          + Post a Project
+        </a>
+      </div>
+    </div>
+
+    <!-- Projects Grid Container -->
+    <div id="my-projects-container" class="projects-grid">
+      <!-- Populated via js/projects.js renderProjectList -->
+    </div>
+  </main>
+
+  <script>
+    if (currentUser) {
+      const myProjects = getMyProjects(currentUser.id);
+      const container = document.getElementById('my-projects-container');
+      renderProjectList(container, myProjects);
+    }
+  </script>
+</body>
+</html>

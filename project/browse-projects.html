@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Browse Open Projects - SkillBridge</title>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    .page-container {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 2.5rem 1.5rem 4rem;
+    }
+    .projects-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 1.5rem;
+    }
+    .filter-controls { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1rem; margin: 1.5rem 0; }
+    .filter-controls label { display: block; font-weight: 600; margin-bottom: .4rem; }
+  </style>
+  <script src="js/storage.js"></script>
+  <script src="js/utils.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/projects.js"></script>
+  <script src="js/ui.js"></script>
+  <script>
+    // Route guard: only freelancers can browse projects through this view
+    const currentUser = requireRole('freelancer');
+  </script>
+</head>
+<body>
+  <!-- Navigation Bar -->
+  <header>
+    <nav class="navbar" id="top-navbar">
+      <a href="index.html" class="nav-brand" id="brand-logo">
+        Skill<span>Bridge</span>
+      </a>
+      <ul class="nav-links">
+        <li><a href="freelancer-dashboard.html" class="nav-link">Dashboard</a></li>
+        <li><a href="browse-projects.html" class="nav-link active">Browse Projects</a></li>
+        <li><a href="my-proposals.html" class="nav-link">My Proposals</a></li>
+        <li><a href="my-profile.html" class="nav-link">My Profile</a></li>
+      </ul>
+      <div class="nav-actions">
+        <button id="logout-btn" class="btn btn-outline" onclick="logout()">Logout</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="page-container">
+    <div style="margin-bottom: 2rem;">
+      <div style="margin-bottom: 0.5rem;">
+        <span class="badge badge-open">Marketplace Listings</span>
+      </div>
+      <h1 style="font-size: 2rem; font-weight: 800; color: var(--color-text); margin-bottom: 0.25rem;">
+        Browse Open Projects
+      </h1>
+      <p style="color: var(--color-text-muted); font-size: 0.9375rem;">
+        Discover open opportunities, match your skills with client requirements, and submit competitive proposals.
+      </p>
+    </div>
+
+    <div class="filter-controls" role="search" aria-label="Filter open projects">
+      <div><label for="project-keyword">Keyword</label><input class="input" id="project-keyword" type="search" placeholder="Search titles or descriptions"></div>
+      <div><label for="project-skill">Skill</label><input class="input" id="project-skill" type="search" placeholder="Filter by required skill"></div>
+    </div>
+
+    <!-- Projects Grid Container -->
+    <div id="open-projects-container" class="projects-grid">
+      <!-- Populated via js/projects.js renderProjectList with targetPage: 'project-view.html' -->
+    </div>
+  </main>
+
+  <script>
+    if (currentUser) {
+      const container = document.getElementById('open-projects-container');
+      const keywordInput = document.getElementById('project-keyword');
+      const skillInput = document.getElementById('project-skill');
+      const renderProjects = () => {
+        const filtered = filterProjects(getOpenProjects(), {
+          keyword: keywordInput.value,
+          skill: skillInput.value
+        });
+        if (filtered.length === 0 && (keywordInput.value.trim() || skillInput.value.trim())) {
+          renderEmptyState(container, { title: 'No matching projects', message: 'Try changing or clearing your filters.' });
+          return;
+        }
+        renderProjectList(container, filtered, {
+          targetPage: 'project-view.html',
+          emptyTitle: 'No Open Projects Available',
+          emptyMessage: 'There are currently no active projects accepting proposals. Check back soon for new opportunities!',
+          emptyCtaText: null
+        });
+      };
+      keywordInput.addEventListener('input', renderProjects);
+      skillInput.addEventListener('input', renderProjects);
+      renderProjects();
+    }
+  </script>
+</body>
+</html>

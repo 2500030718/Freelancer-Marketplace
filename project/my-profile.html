@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Profile - SkillBridge</title>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    .page-container {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 2.5rem 1.5rem 4rem;
+    }
+    .form-group {
+      margin-bottom: 1.5rem;
+    }
+    .form-label {
+      display: block;
+      font-size: 0.875rem;
+      font-weight: 600;
+      margin-bottom: 0.375rem;
+      color: var(--color-text);
+    }
+    .form-hint {
+      font-size: 0.8125rem;
+      color: var(--color-text-muted);
+      margin-top: 0.25rem;
+    }
+    textarea.input {
+      resize: vertical;
+      min-height: 100px;
+    }
+    .portfolio-item-card {
+      background-color: var(--color-bg);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius);
+      padding: 1rem 1.25rem;
+      margin-bottom: 0.75rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 1rem;
+    }
+    .mini-form-card {
+      background-color: var(--color-bg);
+      border: 1px dashed var(--color-border);
+      border-radius: var(--radius);
+      padding: 1.25rem;
+      margin-top: 1rem;
+    }
+  </style>
+  <script src="js/storage.js"></script>
+  <script src="js/utils.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/users.js"></script>
+  <script>
+    // Route guard: only freelancers can edit their freelancer profile
+    let currentUser = requireRole('freelancer');
+  </script>
+</head>
+<body>
+  <!-- Navigation Bar -->
+  <header>
+    <nav class="navbar" id="top-navbar">
+      <a href="index.html" class="nav-brand" id="brand-logo">
+        Skill<span>Bridge</span>
+      </a>
+      <ul class="nav-links">
+        <li><a href="freelancer-dashboard.html" class="nav-link">Dashboard</a></li>
+        <li><a href="browse-projects.html" class="nav-link">Browse Projects</a></li>
+        <li><a href="my-proposals.html" class="nav-link">My Proposals</a></li>
+        <li><a href="my-profile.html" class="nav-link active">My Profile</a></li>
+      </ul>
+      <div class="nav-actions">
+        <button id="logout-btn" class="btn btn-outline" onclick="logout()">Logout</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="page-container">
+    <div style="margin-bottom: 2rem;">
+      <div style="margin-bottom: 0.5rem;">
+        <span class="badge badge-accepted">Profile Settings</span>
+      </div>
+      <h1 style="font-size: 2rem; font-weight: 800; color: var(--color-text); margin-bottom: 0.375rem;">
+        My Freelancer Profile
+      </h1>
+      <p style="color: var(--color-text-muted); font-size: 0.9375rem;">
+        Update your professional bio, skills, and portfolio items to stand out to prospective clients.
+      </p>
+    </div>
+
+    <!-- Success Message Banner -->
+    <div id="save-success-banner" class="badge badge-completed" style="display: none; padding: 0.875rem 1.25rem; font-size: 0.9375rem; margin-bottom: 1.5rem; width: 100%; border-radius: var(--radius); text-align: left;">
+      &#10003; Profile saved successfully! Your changes are active immediately.
+    </div>
+
+    <div class="card" style="padding: 2.25rem 2rem;">
+      <form id="profile-form" novalidate>
+        <!-- Bio Field -->
+        <div class="form-group">
+          <label for="profile-bio" class="form-label">Professional Biography</label>
+          <textarea
+            id="profile-bio"
+            name="bio"
+            class="input"
+            rows="4"
+            placeholder="Introduce yourself, your years of experience, core expertise, and how you deliver value to clients..."
+          ></textarea>
+          <p class="form-hint">Shown at the top of your public profile when clients review your proposals.</p>
+        </div>
+
+        <!-- Skills Field -->
+        <div class="form-group">
+          <label for="profile-skills" class="form-label">Key Skills (Comma-Separated)</label>
+          <input
+            type="text"
+            id="profile-skills"
+            name="skills"
+            class="input"
+            placeholder="e.g. React, Node.js, TypeScript, UI/UX Design, REST APIs"
+          >
+          <p class="form-hint">Separate skills with commas (e.g., Python, Docker, SQL).</p>
+        </div>
+
+        <!-- Portfolio Items Section -->
+        <div class="form-group" style="margin-top: 2rem; border-top: 1px solid var(--color-border); padding-top: 1.75rem;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
+            <div>
+              <h3 style="font-size: 1.125rem; font-weight: 700; color: var(--color-text); margin: 0 0 0.25rem;">
+                Portfolio Items
+              </h3>
+              <p style="color: var(--color-text-muted); font-size: 0.875rem; margin: 0;">
+                Showcase your past work, deliverables, case studies, or live applications.
+              </p>
+            </div>
+          </div>
+
+          <!-- Visible Portfolio Items List -->
+          <div id="portfolio-items-container" style="margin-top: 1rem;">
+            <!-- Populated via script -->
+          </div>
+
+          <!-- Mini Form: Add Portfolio Item -->
+          <div class="mini-form-card">
+            <h4 style="font-size: 0.95rem; font-weight: 700; color: var(--color-text); margin-bottom: 0.75rem;">
+              + Add Portfolio Item
+            </h4>
+            <div style="margin-bottom: 0.75rem;">
+              <input
+                type="text"
+                id="mini-portfolio-title"
+                class="input"
+                placeholder="Project title (e.g. Mobile E-Commerce App)"
+                style="margin-bottom: 0.5rem;"
+              >
+              <textarea
+                id="mini-portfolio-desc"
+                class="input"
+                rows="2"
+                placeholder="Brief description of work and technologies used..."
+                style="margin-bottom: 0.5rem;"
+              ></textarea>
+              <input
+                type="url"
+                id="mini-portfolio-url"
+                class="input"
+                placeholder="Project URL or repository link (optional)"
+              >
+            </div>
+            <button type="button" id="btn-add-portfolio-item" class="btn btn-outline" style="font-size: 0.8125rem; padding: 0.375rem 0.75rem;">
+              Add to Portfolio List
+            </button>
+          </div>
+        </div>
+
+        <div style="display: flex; justify-content: flex-end; gap: 1rem; margin-top: 2.5rem; border-top: 1px solid var(--color-border); padding-top: 1.5rem;">
+          <a href="freelancer-dashboard.html" class="btn btn-outline">Cancel</a>
+          <button type="submit" id="btn-save-profile" class="btn btn-primary">
+            Save Profile
+          </button>
+        </div>
+      </form>
+    </div>
+  </main>
+
+  <script>
+    if (currentUser) {
+      const bioInput = document.getElementById('profile-bio');
+      const skillsInput = document.getElementById('profile-skills');
+      const portfolioContainer = document.getElementById('portfolio-items-container');
+      const successBanner = document.getElementById('save-success-banner');
+
+      // Pre-fill existing data
+      bioInput.value = currentUser.bio || '';
+      skillsInput.value = Array.isArray(currentUser.skills) ? currentUser.skills.join(', ') : '';
+
+      // In-memory working copy of portfolio items
+      let portfolioItems = Array.isArray(currentUser.portfolio) ? [...currentUser.portfolio] : [];
+
+      function renderPortfolioList() {
+        if (portfolioItems.length === 0) {
+          portfolioContainer.innerHTML = `
+            <p style="color: var(--color-text-muted); font-size: 0.875rem; font-style: italic; margin-bottom: 0.75rem;">
+              No portfolio items added yet. Use the form below to add your first work showcase.
+            </p>
+          `;
+          return;
+        }
+
+        portfolioContainer.innerHTML = portfolioItems.map((item, index) => `
+          <div class="portfolio-item-card">
+            <div>
+              <strong style="color: var(--color-text); font-size: 0.95rem;">${escapeUserHtml(item.title || 'Untitled Project')}</strong>
+              ${item.description ? `<p style="color: var(--color-text-muted); font-size: 0.8125rem; margin: 0.25rem 0 0.5rem; line-height: 1.4;">${escapeUserHtml(item.description)}</p>` : ''}
+              ${item.url ? `<a href="${escapeUserHtml(item.url)}" target="_blank" rel="noopener noreferrer" style="font-size: 0.8125rem;">${escapeUserHtml(item.url)} &nearr;</a>` : ''}
+            </div>
+            <button type="button" class="btn btn-outline" style="color: var(--color-danger); border-color: var(--color-border); padding: 0.25rem 0.625rem; font-size: 0.75rem;" onclick="removePortfolioItem(${index})">
+              Remove
+            </button>
+          </div>
+        `).join('');
+      }
+
+      window.removePortfolioItem = function(index) {
+        portfolioItems.splice(index, 1);
+        renderPortfolioList();
+      };
+
+      // Add item handler
+      document.getElementById('btn-add-portfolio-item').addEventListener('click', () => {
+        const titleEl = document.getElementById('mini-portfolio-title');
+        const descEl = document.getElementById('mini-portfolio-desc');
+        const urlEl = document.getElementById('mini-portfolio-url');
+
+        const title = titleEl.value.trim();
+        const description = descEl.value.trim();
+        const url = urlEl.value.trim();
+
+        if (!title) {
+          titleEl.classList.add('input-error');
+          titleEl.focus();
+          return;
+        }
+
+        titleEl.classList.remove('input-error');
+        portfolioItems.push({ title, description, url });
+
+        // Reset mini form
+        titleEl.value = '';
+        descEl.value = '';
+        urlEl.value = '';
+
+        renderPortfolioList();
+      });
+
+      renderPortfolioList();
+
+      // Form save handler
+      document.getElementById('profile-form').addEventListener('submit', (e) => {
+        e.preventDefault();
+
+        const bio = bioInput.value.trim();
+        const skillsRaw = skillsInput.value.trim();
+        const skills = skillsRaw
+          ? skillsRaw.split(',').map(s => s.trim()).filter(Boolean)
+          : [];
+
+        // Save via function in js/users.js
+        const updated = updateFreelancerProfile(currentUser.id, {
+          bio,
+          skills,
+          portfolio: portfolioItems
+        });
+
+        if (updated) {
+          currentUser = getCurrentUser();
+
+          // Show success message
+          successBanner.style.display = 'block';
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+
+          setTimeout(() => {
+            successBanner.style.display = 'none';
+          }, 4000);
+        }
+      });
+    }
+  </script>
+</body>
+</html>

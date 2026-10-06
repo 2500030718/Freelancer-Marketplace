@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Sign Up for SkillBridge - Freelancer Marketplace">
+  <title>Sign Up - SkillBridge</title>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    .auth-container {
+      min-height: calc(100vh - 80px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2.5rem 1.25rem;
+    }
+    .auth-card {
+      max-width: 460px;
+      width: 100%;
+      padding: 2.25rem 2rem;
+    }
+    .auth-header {
+      text-align: center;
+      margin-bottom: 1.75rem;
+    }
+    .auth-title {
+      font-size: 1.75rem;
+      font-weight: 700;
+      color: var(--color-text);
+      margin-bottom: 0.5rem;
+    }
+    .auth-subtitle {
+      color: var(--color-text-muted);
+      font-size: 0.9375rem;
+    }
+    .form-group {
+      margin-bottom: 1.25rem;
+      text-align: left;
+    }
+    .form-label {
+      display: block;
+      font-size: 0.875rem;
+      font-weight: 600;
+      margin-bottom: 0.375rem;
+      color: var(--color-text);
+    }
+    .auth-footer {
+      text-align: center;
+      margin-top: 1.5rem;
+      font-size: 0.9rem;
+      color: var(--color-text-muted);
+    }
+    .general-alert {
+      padding: 0.625rem 0.875rem;
+      background-color: rgba(220, 38, 38, 0.08);
+      border: 1px solid rgba(220, 38, 38, 0.25);
+      border-radius: var(--radius);
+      margin-bottom: 1.25rem;
+      font-size: 0.875rem;
+    }
+    select.input {
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <!-- Navigation Bar -->
+  <header>
+    <nav class="navbar" id="top-navbar">
+      <a href="index.html" class="nav-brand" id="brand-logo">
+        Skill<span>Bridge</span>
+      </a>
+      <div class="nav-actions">
+        <a href="index.html" class="btn btn-outline" id="nav-btn-home">Home</a>
+        <a href="login.html" class="btn btn-outline" id="nav-btn-login">Login</a>
+      </div>
+    </nav>
+  </header>
+
+  <!-- Auth Content -->
+  <main class="auth-container">
+    <div class="card auth-card">
+      <div class="auth-header">
+        <div style="margin-bottom: 0.75rem;">
+          <span class="badge badge-open">Get Started</span>
+        </div>
+        <h1 class="auth-title">Create Your Account</h1>
+        <p class="auth-subtitle">Join as a client looking to hire, or as a skilled freelancer.</p>
+      </div>
+
+      <div id="signup-general-error" class="input-error-message general-alert" style="display: none;"></div>
+
+      <form id="signup-form" novalidate>
+        <div class="form-group">
+          <label for="name" class="form-label">Full Name</label>
+          <input
+            type="text"
+            id="name"
+            name="name"
+            class="input"
+            placeholder="e.g. Alex Morgan"
+            required
+            autocomplete="name"
+          >
+          <span id="name-error" class="input-error-message" style="display: none;"></span>
+        </div>
+
+        <div class="form-group">
+          <label for="email" class="form-label">Email Address</label>
+          <input
+            type="email"
+            id="email"
+            name="email"
+            class="input"
+            placeholder="alex@example.com"
+            required
+            autocomplete="email"
+          >
+          <span id="email-error" class="input-error-message" style="display: none;"></span>
+        </div>
+
+        <div class="form-group">
+          <label for="password" class="form-label">Password (at least 6 characters)</label>
+          <input
+            type="password"
+            id="password"
+            name="password"
+            class="input"
+            placeholder="••••••••"
+            required
+            autocomplete="new-password"
+          >
+          <span id="password-error" class="input-error-message" style="display: none;"></span>
+        </div>
+
+        <div class="form-group">
+          <label for="role" class="form-label">I want to join as</label>
+          <select id="role" name="role" class="input" required>
+            <option value="" disabled selected>Select your role...</option>
+            <option value="client">Client (I want to post projects and hire)</option>
+            <option value="freelancer">Freelancer (I want to find projects and work)</option>
+          </select>
+          <span id="role-error" class="input-error-message" style="display: none;"></span>
+        </div>
+
+        <button type="submit" id="signup-submit-btn" class="btn btn-primary" style="width: 100%; margin-top: 0.5rem;">
+          Create Account
+        </button>
+      </form>
+
+      <div class="auth-footer">
+        Already have an account? <a href="login.html" id="link-to-login">Log In</a>
+      </div>
+    </div>
+  </main>
+
+  <!-- Required Scripts -->
+  <script src="js/storage.js"></script>
+  <script src="js/utils.js"></script>
+  <script src="js/auth.js"></script>
+</body>
+</html>

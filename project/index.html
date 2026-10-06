@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="SkillBridge - Freelancer Marketplace Prototype. Connecting clients and skilled freelancers through streamlined proposals and straightforward collaboration.">
+  <title>SkillBridge - Freelancer Marketplace</title>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    /* Page-level layout styles reusing design tokens from style.css */
+    .container {
+      width: 100%;
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 0 1.5rem;
+    }
+
+    /* Hero Section */
+    .hero-section {
+      padding: 4.5rem 0 3.5rem;
+      text-align: center;
+    }
+
+    .hero-badge-wrap {
+      margin-bottom: 1.25rem;
+    }
+
+    .hero-title {
+      font-size: clamp(2rem, 5vw, 3rem);
+      font-weight: 800;
+      color: var(--color-text);
+      line-height: 1.2;
+      margin-bottom: 1.25rem;
+      letter-spacing: -0.02em;
+    }
+
+    .hero-title span {
+      color: var(--color-primary);
+    }
+
+    .hero-problem {
+      font-size: 1.125rem;
+      color: var(--color-text-muted);
+      max-width: 720px;
+      margin: 0 auto 0.75rem;
+      line-height: 1.6;
+    }
+
+    .hero-solution {
+      font-size: 1.125rem;
+      font-weight: 500;
+      color: var(--color-text);
+      max-width: 720px;
+      margin: 0 auto 2.25rem;
+      line-height: 1.6;
+    }
+
+    .hero-actions {
+      display: flex;
+      justify-content: center;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    /* "How It Works" Section */
+    .how-it-works-section {
+      padding: 3.5rem 0 4.5rem;
+      border-top: 1px solid var(--color-border);
+    }
+
+    .section-header {
+      text-align: center;
+      margin-bottom: 3rem;
+    }
+
+    .section-title {
+      font-size: 2rem;
+      font-weight: 700;
+      color: var(--color-text);
+      margin-bottom: 0.5rem;
+    }
+
+    .section-subtitle {
+      font-size: 1rem;
+      color: var(--color-text-muted);
+      max-width: 620px;
+      margin: 0 auto;
+    }
+
+    .track-block {
+      margin-bottom: 3.5rem;
+    }
+
+    .track-block:last-child {
+      margin-bottom: 0;
+    }
+
+    .track-header {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .track-title {
+      font-size: 1.35rem;
+      font-weight: 700;
+      color: var(--color-text);
+    }
+
+    /* Page-level CSS Grid per design requirements */
+    .steps-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.5rem;
+    }
+
+    .step-card {
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      padding: 1.75rem;
+    }
+
+    .step-card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1rem;
+    }
+
+    .step-title {
+      font-size: 1.125rem;
+      font-weight: 600;
+      color: var(--color-text);
+      margin-bottom: 0.5rem;
+    }
+
+    .step-desc {
+      font-size: 0.9375rem;
+      color: var(--color-text-muted);
+      line-height: 1.55;
+      flex-grow: 1;
+    }
+
+    /* Footer */
+    .footer {
+      background-color: var(--color-surface);
+      border-top: 1px solid var(--color-border);
+      padding: 2.5rem 0 2rem;
+      margin-top: auto;
+    }
+
+    .footer-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 1.5rem;
+    }
+
+    .footer-brand {
+      font-size: 1.125rem;
+      font-weight: 700;
+      color: var(--color-primary);
+      text-decoration: none;
+    }
+
+    .footer-brand span {
+      color: var(--color-text);
+    }
+
+    .footer-text {
+      font-size: 0.875rem;
+      color: var(--color-text-muted);
+      margin-top: 0.25rem;
+    }
+
+    .footer-links {
+      display: flex;
+      align-items: center;
+      gap: 1.25rem;
+      list-style: none;
+    }
+
+    .footer-link {
+      color: var(--color-text-muted);
+      font-size: 0.875rem;
+      text-decoration: none;
+      transition: color 0.2s ease;
+    }
+
+    .footer-link:hover {
+      color: var(--color-primary);
+    }
+
+    /* Responsive adjustments for tablet & mobile (~375px) */
+    @media (max-width: 768px) {
+      .steps-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+      }
+
+      .navbar {
+        padding: 0.75rem 1rem;
+      }
+
+      .nav-brand {
+        font-size: 1.125rem;
+      }
+
+      .nav-actions {
+        gap: 0.5rem;
+      }
+
+      .btn {
+        padding: 0.5rem 0.875rem;
+        font-size: 0.875rem;
+      }
+
+      .hero-section {
+        padding: 3rem 0 2.25rem;
+      }
+
+      .hero-problem,
+      .hero-solution {
+        font-size: 1rem;
+      }
+
+      .footer-inner {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+    }
+
+    @media (max-width: 400px) {
+      .navbar {
+        padding: 0.75rem 0.75rem;
+      }
+
+      .hero-actions {
+        flex-direction: column;
+        width: 100%;
+      }
+
+      .hero-actions .btn {
+        width: 100%;
+      }
+
+      .step-card {
+        padding: 1.25rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Navigation Bar (Flexbox layout) -->
+  <header>
+    <nav class="navbar" id="main-nav">
+      <a href="index.html" class="nav-brand" id="brand-logo">
+        Skill<span>Bridge</span>
+      </a>
+      <div class="nav-actions" id="nav-actions">
+        <a href="login.html" class="btn btn-outline" id="nav-btn-login">Login</a>
+        <a href="signup.html" class="btn btn-primary" id="nav-btn-signup">Sign Up</a>
+      </div>
+    </nav>
+  </header>
+
+  <!-- Hero Section -->
+  <main>
+    <section class="hero-section" id="hero">
+      <div class="container">
+        <div class="hero-badge-wrap">
+          <span class="badge badge-open">Freelancer Marketplace Prototype</span>
+        </div>
+        <h1 class="hero-title" id="hero-heading">
+          Connecting Talent with <span>Opportunity</span>
+        </h1>
+        <!-- One-sentence problem statement -->
+        <p class="hero-problem" id="hero-problem-stmt">
+          Traditional hiring is slow, expensive, and opaque, leaving businesses stranded without the right talent and skilled freelancers without trusted clients.
+        </p>
+        <!-- One-sentence product statement -->
+        <p class="hero-solution" id="hero-solution-stmt">
+          SkillBridge connects ambitious clients directly with vetted freelancers through streamlined proposals and straightforward collaboration.
+        </p>
+        <!-- Primary CTA linking to signup.html -->
+        <div class="hero-actions">
+          <a href="signup.html" class="btn btn-primary" id="hero-cta-signup">Get Started Free</a>
+          <a href="#how-it-works" class="btn btn-outline" id="hero-cta-learn">How It Works</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- How It Works Section (CSS Grid) -->
+    <section class="how-it-works-section" id="how-it-works">
+      <div class="container">
+        <div class="section-header">
+          <h2 class="section-title">How It Works</h2>
+          <p class="section-subtitle">
+            A streamlined, proposal-based marketplace designed for both hiring clients and independent freelancers.
+          </p>
+        </div>
+
+        <!-- Track 1: 3 Steps for Clients -->
+        <div class="track-block" id="client-steps">
+          <div class="track-header">
+            <span class="badge badge-in-progress">For Clients</span>
+            <h3 class="track-title">Hire Top Talent in 3 Simple Steps</h3>
+          </div>
+          <div class="steps-grid">
+            <article class="card step-card" id="client-step-1">
+              <div class="step-card-header">
+                <span class="badge badge-open">Step 1</span>
+              </div>
+              <h4 class="step-title">Post a Project</h4>
+              <p class="step-desc">
+                Define your project scope, budget range, and required skills in minutes to broadcast your opportunity to qualified freelancers.
+              </p>
+            </article>
+
+            <article class="card step-card" id="client-step-2">
+              <div class="step-card-header">
+                <span class="badge badge-pending">Step 2</span>
+              </div>
+              <h4 class="step-title">Review Proposals</h4>
+              <p class="step-desc">
+                Receive customized proposals, evaluate freelancer profiles, and select the best freelancer whose timeline and rate match your needs.
+              </p>
+            </article>
+
+            <article class="card step-card" id="client-step-3">
+              <div class="step-card-header">
+                <span class="badge badge-completed">Step 3</span>
+              </div>
+              <h4 class="step-title">Collaborate & Complete</h4>
+              <p class="step-desc">
+                Work directly with your chosen freelancer, provide feedback as work progresses, and approve the completed project.
+              </p>
+            </article>
+          </div>
+        </div>
+
+        <!-- Track 2: 3 Steps for Freelancers -->
+        <div class="track-block" id="freelancer-steps">
+          <div class="track-header">
+            <span class="badge badge-completed">For Freelancers</span>
+            <h3 class="track-title">Grow Your Career in 3 Simple Steps</h3>
+          </div>
+          <div class="steps-grid">
+            <article class="card step-card" id="freelancer-step-1">
+              <div class="step-card-header">
+                <span class="badge badge-open">Step 1</span>
+              </div>
+              <h4 class="step-title">Build Your Profile</h4>
+              <p class="step-desc">
+                Create a professional profile displaying your domain expertise, skill set, and preferred rates.
+              </p>
+            </article>
+
+            <article class="card step-card" id="freelancer-step-2">
+              <div class="step-card-header">
+                <span class="badge badge-pending">Step 2</span>
+              </div>
+              <h4 class="step-title">Submit Tailored Proposals</h4>
+              <p class="step-desc">
+                Browse open client projects, submit competitive bids with clear timelines, and showcase how your skills solve the client's needs.
+              </p>
+            </article>
+
+            <article class="card step-card" id="freelancer-step-3">
+              <div class="step-card-header">
+                <span class="badge badge-accepted">Step 3</span>
+              </div>
+              <h4 class="step-title">Deliver & Track Progress</h4>
+              <p class="step-desc">
+                Complete the project work, keep the client updated on status, and finalize the project once deliverables are met.
+              </p>
+            </article>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Simple Footer -->
+  <footer class="footer" id="main-footer">
+    <div class="container footer-inner">
+      <div>
+        <a href="index.html" class="footer-brand">
+          Skill<span>Bridge</span>
+        </a>
+        <p class="footer-text">
+          &copy; 2026 SkillBridge. Prototype built with vanilla HTML, CSS, and JavaScript.
+        </p>
+      </div>
+      <ul class="footer-links">
+        <li><a href="index.html" class="footer-link">Home</a></li>
+        <li><a href="login.html" class="footer-link">Login</a></li>
+        <li><a href="signup.html" class="footer-link">Sign Up</a></li>
+      </ul>
+    </div>
+  </footer>
+
+  <!-- Scripts -->
+  <script src="js/storage.js"></script>
+  <script src="js/utils.js"></script>
+</body>
+</html>

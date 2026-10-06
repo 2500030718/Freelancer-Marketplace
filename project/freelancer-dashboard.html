@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Freelancer Dashboard - SkillBridge</title>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    .page-container {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 2.5rem 1.5rem 4rem;
+    }
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 1.25rem;
+      margin-bottom: 2.5rem;
+    }
+    .stat-card {
+      padding: 1.5rem;
+    }
+    .stat-label {
+      font-size: 0.875rem;
+      color: var(--color-text-muted);
+      margin-bottom: 0.5rem;
+      font-weight: 500;
+    }
+    .stat-value {
+      font-size: 2.25rem;
+      font-weight: 800;
+      color: var(--color-text);
+      line-height: 1;
+    }
+    .shortcuts-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 2.5rem;
+    }
+    .shortcut-card {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 1.75rem;
+    }
+  </style>
+  <script src="js/storage.js"></script>
+  <script src="js/utils.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/projects.js"></script>
+  <script src="js/users.js"></script>
+  <script>
+    // Route guard: ensures only logged-in freelancer can access
+    const currentUser = requireRole('freelancer');
+  </script>
+</head>
+<body>
+  <!-- Navigation Bar -->
+  <header>
+    <nav class="navbar" id="top-navbar">
+      <a href="index.html" class="nav-brand" id="brand-logo">
+        Skill<span>Bridge</span>
+      </a>
+      <ul class="nav-links">
+        <li><a href="freelancer-dashboard.html" class="nav-link active">Dashboard</a></li>
+        <li><a href="browse-projects.html" class="nav-link">Browse Projects</a></li>
+        <li><a href="my-proposals.html" class="nav-link">My Proposals</a></li>
+        <li><a href="my-profile.html" class="nav-link">My Profile</a></li>
+      </ul>
+      <div class="nav-actions">
+        <button id="logout-btn" class="btn btn-outline" onclick="logout()">Logout</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="page-container">
+    <!-- Welcome Header -->
+    <div style="margin-bottom: 2rem;">
+      <div style="margin-bottom: 0.5rem;">
+        <span class="badge badge-accepted">Freelancer Portal</span>
+      </div>
+      <h1 id="welcome-heading" style="font-size: 2.25rem; font-weight: 800; color: var(--color-text); margin-bottom: 0.5rem; letter-spacing: -0.02em;">
+        Welcome back, <span id="freelancer-name">Freelancer</span>!
+      </h1>
+      <p id="user-info" style="color: var(--color-text-muted); font-size: 1rem;">
+        Logged in as: <span id="user-display">Loading...</span>
+      </p>
+    </div>
+
+    <!-- Quick Stats -->
+    <section class="stats-grid" id="stats-section">
+      <div class="card stat-card">
+        <div class="stat-label">Proposals Submitted</div>
+        <div class="stat-value" id="stat-proposals-submitted">0</div>
+      </div>
+      <div class="card stat-card">
+        <div class="stat-label">Proposals Accepted</div>
+        <div class="stat-value" style="color: var(--color-accent);" id="stat-proposals-accepted">0</div>
+      </div>
+      <div class="card stat-card">
+        <div class="stat-label">Open Projects Available</div>
+        <div class="stat-value" style="color: var(--color-primary);" id="stat-open-projects">0</div>
+      </div>
+    </section>
+
+    <!-- Shortcut Cards -->
+    <section>
+      <h2 style="font-size: 1.375rem; font-weight: 700; color: var(--color-text); margin-bottom: 1.25rem;">
+        Quick Actions
+      </h2>
+      <div class="shortcuts-grid">
+        <div class="card shortcut-card">
+          <div>
+            <div style="width: 40px; height: 40px; border-radius: var(--radius); background-color: rgba(37,99,235,0.1); color: var(--color-primary); display: flex; align-items: center; justify-content: center; font-weight: 700; margin-bottom: 1rem;">
+              &#128269;
+            </div>
+            <h3 style="font-size: 1.25rem; font-weight: 700; color: var(--color-text); margin-bottom: 0.5rem;">
+              Browse Projects
+            </h3>
+            <p style="color: var(--color-text-muted); font-size: 0.9375rem; line-height: 1.5; margin-bottom: 1.5rem;">
+              Explore open client project listings, review budgets and skill requirements, and find your next engagement.
+            </p>
+          </div>
+          <a href="browse-projects.html" class="btn btn-primary" id="btn-shortcut-browse-projects">
+            Browse Projects &rarr;
+          </a>
+        </div>
+
+        <div class="card shortcut-card">
+          <div>
+            <div style="width: 40px; height: 40px; border-radius: var(--radius); background-color: rgba(22,163,74,0.1); color: var(--color-accent); display: flex; align-items: center; justify-content: center; font-weight: 700; margin-bottom: 1rem;">
+              &#9998;
+            </div>
+            <h3 style="font-size: 1.25rem; font-weight: 700; color: var(--color-text); margin-bottom: 0.5rem;">
+              Edit Profile
+            </h3>
+            <p style="color: var(--color-text-muted); font-size: 0.9375rem; line-height: 1.5; margin-bottom: 1.5rem;">
+              Highlight your expertise, update your professional bio, list your key skills, and show off your portfolio.
+            </p>
+          </div>
+          <a href="my-profile.html" class="btn btn-outline" id="btn-shortcut-profile">
+            Edit Profile &rarr;
+          </a>
+        </div>
+
+        <div class="card shortcut-card">
+          <div>
+            <div style="width: 40px; height: 40px; border-radius: var(--radius); background-color: rgba(217,119,6,0.1); color: var(--color-warning); display: flex; align-items: center; justify-content: center; font-weight: 700; margin-bottom: 1rem;">
+              &#128196;
+            </div>
+            <h3 style="font-size: 1.25rem; font-weight: 700; color: var(--color-text); margin-bottom: 0.5rem;">
+              My Proposals
+            </h3>
+            <p style="color: var(--color-text-muted); font-size: 0.9375rem; line-height: 1.5; margin-bottom: 1.5rem;">
+              Track the progress of your submitted proposals, review bid statuses, and communicate with clients.
+            </p>
+          </div>
+          <a href="my-proposals.html" class="btn btn-outline" id="btn-shortcut-proposals">
+            View Proposals &rarr;
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <!-- Available Projects Preview -->
+    <section style="margin-top: 1rem;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem;">
+        <h2 style="font-size: 1.375rem; font-weight: 700; color: var(--color-text);">
+          Featured Open Projects
+        </h2>
+        <a href="browse-projects.html" style="font-size: 0.9rem; font-weight: 600;">View all &rarr;</a>
+      </div>
+      <div id="open-projects-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.25rem;">
+        <!-- Populated via script -->
+      </div>
+    </section>
+  </main>
+
+  <script>
+    if (currentUser) {
+      document.getElementById('freelancer-name').textContent = currentUser.name || 'Freelancer';
+      document.getElementById('user-display').textContent = `${currentUser.name} (${currentUser.role})`;
+      document.getElementById('user-info').textContent = `Logged in as: ${currentUser.name} (${currentUser.role})`;
+
+      // Proposals stats
+      const myProposals = getAll('proposals').filter(p => String(p.freelancerId) === String(currentUser.id));
+      document.getElementById('stat-proposals-submitted').textContent = myProposals.length;
+      const acceptedCount = myProposals.filter(p => String(p.status).toUpperCase() === 'ACCEPTED').length;
+      document.getElementById('stat-proposals-accepted').textContent = acceptedCount;
+
+      // Open projects count
+      const openProjects = getOpenProjects();
+      document.getElementById('stat-open-projects').textContent = openProjects.length;
+
+      // Render top 3 open projects with targetPage 'project-view.html'
+      const openContainer = document.getElementById('open-projects-grid');
+      renderProjectList(openContainer, openProjects.slice(0, 3), {
+        targetPage: 'project-view.html',
+        emptyTitle: 'No Open Projects Available',
+        emptyMessage: 'Check back soon! When clients publish projects, they will be listed here.',
+        emptyCtaText: null
+      });
+    }
+  </script>
+</body>
+</html>

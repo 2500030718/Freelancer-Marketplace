@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Freelancer Profile - SkillBridge</title>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    .page-container {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 2.5rem 1.5rem 4rem;
+    }
+    .profile-header {
+      display: flex;
+      align-items: center;
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+      flex-wrap: wrap;
+    }
+    .avatar-large {
+      width: 72px;
+      height: 72px;
+      border-radius: 50%;
+      background-color: var(--color-primary);
+      color: #ffffff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2rem;
+      font-weight: 800;
+      flex-shrink: 0;
+    }
+    .portfolio-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1.25rem;
+    }
+  </style>
+  <script src="js/storage.js"></script>
+  <script src="js/utils.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/users.js"></script>
+  <script>
+    // Route guard: clients viewing freelancer profile
+    const currentUser = requireRole('client');
+  </script>
+</head>
+<body>
+  <!-- Navigation Bar -->
+  <header>
+    <nav class="navbar" id="top-navbar">
+      <a href="index.html" class="nav-brand" id="brand-logo">
+        Skill<span>Bridge</span>
+      </a>
+      <ul class="nav-links">
+        <li><a href="client-dashboard.html" class="nav-link">Dashboard</a></li>
+        <li><a href="my-projects.html" class="nav-link">My Projects</a></li>
+        <li><a href="post-project.html" class="nav-link">Post a Project</a></li>
+        <li><a href="browse-freelancers.html" class="nav-link">Browse Freelancers</a></li>
+      </ul>
+      <div class="nav-actions">
+        <button id="logout-btn" class="btn btn-outline" onclick="logout()">Logout</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="page-container">
+    <div style="margin-bottom: 1.5rem;">
+      <a href="browse-freelancers.html" style="font-size: 0.875rem; color: var(--color-text-muted); display: inline-flex; align-items: center; gap: 0.25rem;">
+        &larr; Back to Browse Freelancers
+      </a>
+    </div>
+
+    <!-- Container populated dynamically -->
+    <div id="profile-container">
+      <div class="card" style="padding: 2.5rem; text-align: center;">
+        <p style="color: var(--color-text-muted);">Loading freelancer profile...</p>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    if (currentUser) {
+      const urlParams = new URLSearchParams(window.location.search);
+      const freelancerId = urlParams.get('id');
+      const container = document.getElementById('profile-container');
+
+      const user = getUserById(freelancerId);
+
+      if (!user || user.role !== 'freelancer') {
+        container.innerHTML = `
+          <div class="card" style="text-align: center; padding: 3rem 1.5rem;">
+            <div style="margin-bottom: 1rem;">
+              <span class="badge badge-rejected">Not Found</span>
+            </div>
+            <h2 style="font-size: 1.5rem; font-weight: 700; color: var(--color-text); margin-bottom: 0.5rem;">
+              Freelancer Not Found
+            </h2>
+            <p style="color: var(--color-text-muted); margin-bottom: 1.5rem; font-size: 0.95rem;">
+              The requested freelancer profile could not be found.
+            </p>
+            <a href="browse-freelancers.html" class="btn btn-primary">&larr; Back to Browse Freelancers</a>
+          </div>
+        `;
+      } else {
+        const nameInitial = (user.name || 'F').charAt(0).toUpperCase();
+        const memberSince = user.createdAt ? new Date(user.createdAt).toLocaleDateString() : 'Recent';
+
+        // Skills HTML
+        const skillsHtml = Array.isArray(user.skills) && user.skills.length > 0
+          ? user.skills
+              .map(s => `<span class="badge" style="background-color: rgba(37,99,235,0.08); color: var(--color-primary); font-size: 0.8125rem;">${escapeUserHtml(s)}</span>`)
+              .join(' ')
+          : '<p style="color: var(--color-text-muted); font-size: 0.9rem;">No skills listed yet.</p>';
+
+        // Bio HTML
+        const bioHtml = user.bio && user.bio.trim()
+          ? `<p style="color: var(--color-text); font-size: 1rem; line-height: 1.7; white-space: pre-line;">${escapeUserHtml(user.bio)}</p>`
+          : '<p style="color: var(--color-text-muted); font-size: 0.95rem;">This freelancer has not added a biography yet.</p>';
+
+        // Portfolio items (read-only)
+        let portfolioHtml = '';
+        if (Array.isArray(user.portfolio) && user.portfolio.length > 0) {
+          portfolioHtml = `
+            <div class="portfolio-grid">
+              ${user.portfolio.map(item => `
+                <div class="card" style="padding: 1.25rem;">
+                  <h4 style="font-size: 1.05rem; font-weight: 700; margin-bottom: 0.5rem; color: var(--color-text);">
+                    ${escapeUserHtml(item.title || 'Portfolio Item')}
+                  </h4>
+                  <p style="color: var(--color-text-muted); font-size: 0.875rem; line-height: 1.5; margin-bottom: 0.75rem;">
+                    ${escapeUserHtml(item.description || '')}
+                  </p>
+                  ${item.url ? `<a href="${escapeUserHtml(item.url)}" target="_blank" rel="noopener noreferrer" style="font-size: 0.8125rem; font-weight: 600;">View Project &nearr;</a>` : ''}
+                </div>
+              `).join('')}
+            </div>
+          `;
+        } else {
+          portfolioHtml = `
+            <div class="card" style="text-align: center; padding: 2rem 1.5rem; background-color: var(--color-bg);">
+              <p style="color: var(--color-text-muted); font-size: 0.9375rem; margin: 0;">
+                No portfolio items have been added to this profile yet.
+              </p>
+            </div>
+          `;
+        }
+
+        container.innerHTML = `
+          <!-- Header Card -->
+          <div class="card" style="padding: 2.25rem 2rem; margin-bottom: 1.75rem;">
+            <div class="profile-header">
+              <div class="avatar-large">
+                ${escapeUserHtml(nameInitial)}
+              </div>
+              <div>
+                <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.25rem; flex-wrap: wrap;">
+                  <h1 style="font-size: 1.75rem; font-weight: 800; color: var(--color-text); margin: 0;">
+                    ${escapeUserHtml(user.name)}
+                  </h1>
+                  <span class="badge badge-accepted">Freelancer</span>
+                </div>
+                <p style="color: var(--color-text-muted); font-size: 0.875rem; margin: 0;">
+                  Member since ${escapeUserHtml(memberSince)}
+                </p>
+              </div>
+            </div>
+
+            <!-- Bio -->
+            <div style="border-top: 1px solid var(--color-border); padding-top: 1.5rem;">
+              <h3 style="font-size: 1.05rem; font-weight: 700; color: var(--color-text); margin-bottom: 0.5rem;">
+                About
+              </h3>
+              ${bioHtml}
+            </div>
+          </div>
+
+          <!-- Skills Card -->
+          <div class="card" style="padding: 1.75rem 2rem; margin-bottom: 1.75rem;">
+            <h3 style="font-size: 1.05rem; font-weight: 700; color: var(--color-text); margin-bottom: 0.75rem;">
+              Skills & Expertise
+            </h3>
+            <div style="display: flex; flex-wrap: wrap; gap: 0.5rem;">
+              ${skillsHtml}
+            </div>
+          </div>
+
+          <!-- Portfolio Section -->
+          <div>
+            <h3 style="font-size: 1.25rem; font-weight: 700; color: var(--color-text); margin-bottom: 1rem;">
+              Portfolio & Deliverables
+            </h3>
+            ${portfolioHtml}
+          </div>
+        `;
+      }
+    }
+  </script>
+</body>
+</html>
